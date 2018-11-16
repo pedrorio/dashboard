@@ -4,11 +4,11 @@ services:
 
 before_install:
   - docker build -t pedrorio/client -f ./client/Dockerfile.dev ./client
-  - docker build -t pedrorio/api -f ./api/Dockerfile.dev ./api
+#  - docker build -t pedrorio/api -f ./api/Dockerfile.dev ./api
 
 script:
   - docker run pedrorio/client yarn test
-  - docker run pedrorio/api yarn test
+#  - docker run pedrorio/api yarn test
 
 after_success:
   - docker build -t pedrorio/birdie-challenge-client ./client
@@ -25,7 +25,7 @@ deploy:
   provider: elasticbeanstalk
   region: eu-west-2
   app: BirdieCensusChallenge
-  env: BirdieCensusChallenge-Production
+  env: BirdieCensusChallengeProduction
   bucket_name: elasticbeanstalk-eu-west-2-269583353353
   bucket_path: BirdieCensusChallenge
   on:

@@ -36,6 +36,7 @@ describe("API endpoints", () => {
         .expect(200)
         .end(done);
     } catch (error) {
+      console.log(error)
       return Error(error);
     }
 
