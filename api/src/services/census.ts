@@ -10,7 +10,7 @@ export interface IColumnName extends mysql.RowDataPacket {
 export type RemainingTotalCount = number;
 export type RemainingUniqueValuesCount = number;
 
-export type Success = [] | IColumnName[] | IData[] | RemainingTotalCount[] | RemainingUniqueValuesCount[];
+export type Success = IColumnName[] | IData[] | RemainingTotalCount[] | RemainingUniqueValuesCount[];
 export type Error = string[];
 
 export interface IResponse {

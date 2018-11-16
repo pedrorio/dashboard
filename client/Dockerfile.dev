@@ -1,6 +1,6 @@
 FROM node:alpine
-WORKDIR '/client'
-COPY ./package.json ./
+WORKDIR '/app'
+COPY package.json yarn.lock ./
 RUN yarn
 COPY ./ ./
 CMD ["yarn", "start:dev"]

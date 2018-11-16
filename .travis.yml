@@ -1,0 +1,35 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t pedrorio/client -f ./client/Dockerfile.dev ./client
+  - docker build -t pedrorio/api -f ./client/Dockerfile.dev ./api
+
+script:
+  - docker run pedrorio/client yarn test
+  - docker run pedrorio/api yarn test
+
+after_success:
+  - docker build -t pedrorio/birdie-challenge-client ./client
+  - docker build -t pedrorio/birdie-challenge-nginx ./nginx
+  - docker build -t pedrorio/birdie-challenge-api ./api
+  # Login in to the docker cli
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take those images and push them to docker hub
+  - docker push pedrorio/birdie-challenge-client
+  - docker push pedrorio/birdie-challenge-nginx
+  - docker push pedrorio/birdie-challenge-api
+
+deploy:
+  provider: elasticbeanstalk
+  region: eu-west-2
+  app: BirdieCensusChallenge
+  env: BirdieCensusChallenge-Production
+  bucket_name: elasticbeanstalk-eu-west-2-269583353353
+  bucket_path: BirdieCensusChallenge
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key:
+    secure: $AWS_SECRET_KEY

@@ -1,25 +1,43 @@
-import {App} from "../App";
 import * as request from "supertest";
+import {App} from "../App";
+import {pool} from "../services/census";
 
-describe('API endpoints', () => {
+describe("API endpoints", () => {
 
   let app;
+  let server;
 
-  beforeAll(() => {
+  beforeAll((done) => {
     app = App();
+    server = app.listen(done);
   });
 
-  it("GET random url ",  (done) => {
-    // const request = await axios.get('/random')
+  afterAll(async (done) => {
+    await pool.end();
+    server.close(done);
+  });
+
+  it("GET random url",  (done) => {
     try {
       request(app)
-        .get('/random')
+        .get("/random")
         .expect(404)
         .end(done);
     } catch (error) {
-      Error(error);
+      return Error(error);
     }
 
   });
-      // expect(request.status).toBe(200)
+
+  it("GET column-names",  (done) => {
+    try {
+      request(app)
+        .get("/census/column-names")
+        .expect(200)
+        .end(done);
+    } catch (error) {
+      return Error(error);
+    }
+
+  });
 });

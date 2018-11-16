@@ -12,12 +12,12 @@ services:
       dockerfile: Dockerfile.dev
       context: ./api
     volumes:
-      - /api/node_modules
-      - ./api:/api
+      - /app/node_modules
+      - ./api:/app
   client:
     build:
       dockerfile: Dockerfile.dev
       context: ./client
     volumes:
-      - /client/node_modules
-      - ./client:/client
+      - /app/node_modules
+      - ./client:/app

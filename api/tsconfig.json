@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "outDir": "./dist/",
+    "outDir": "./build/",
     "removeComments": true,
     "sourceMap": true,
     "pretty": true,

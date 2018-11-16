@@ -30,6 +30,8 @@
   },
   "scripts": {
     "start:dev": "nodemon --exec ts-node -- ./src/index.ts",
+    "build": "tsc",
+    "start": "node -- ./build/index.js",
     "test": "jest --coverage",
     "test:watch": "jest --coverage --watch"
   }

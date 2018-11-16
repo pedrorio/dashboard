@@ -19,7 +19,7 @@ export const StyledText = styled.h3`
     color: #1D1F26;
     font-size: large;
     font-weight: bold;
-
+    text-align: center;
 `;
 
 export const Link = styled(RouterLink)`
