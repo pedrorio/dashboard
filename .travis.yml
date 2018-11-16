@@ -4,7 +4,7 @@ services:
 
 before_install:
   - docker build -t pedrorio/client -f ./client/Dockerfile.dev ./client
-  - docker build -t pedrorio/api -f ./client/Dockerfile.dev ./api
+  - docker build -t pedrorio/api -f ./api/Dockerfile.dev ./api
 
 script:
   - docker run pedrorio/client yarn test
