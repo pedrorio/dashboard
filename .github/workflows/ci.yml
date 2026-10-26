@@ -35,3 +35,39 @@ jobs:
       - run: yarn typecheck
       - run: yarn lint
       - run: yarn test --coverage=false --watchman=false
+
+  api-mysql:
+    name: API MySQL 9
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:9
+        env:
+          MYSQL_ROOT_PASSWORD: census
+          MYSQL_DATABASE: census
+          MYSQL_USER: census
+          MYSQL_PASSWORD: census
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -ucensus -pcensus --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=30
+          --health-start-period=40s
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "12"
+      - run: yarn install --frozen-lockfile
+      - run: yarn test --coverage=false --watchman=false
+        env:
+          CENSUS_DB_HOST: 127.0.0.1
+          CENSUS_DB_PORT: "3306"
+          CENSUS_DB_USER: census
+          CENSUS_DB_PASSWORD: census
+          CENSUS_DB_NAME: census

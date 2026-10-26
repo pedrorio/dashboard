@@ -3,6 +3,11 @@ import { censusServiceConfig } from "../config/services";
 
 export const pool: mysql.Pool  = mysql.createPool(censusServiceConfig as mysql.PoolOptions);
 
+async function readRows<T>(sql: string, values?: string | string[]): Promise<T[]> {
+    const queried = values === undefined ? await pool.query(sql) : await pool.query(sql, values);
+    return queried[0] as T[];
+}
+
 export interface IColumnName extends mysql.RowDataPacket {
     column_name: string;
 }
@@ -21,62 +26,61 @@ export interface IResponse {
 export const columnNames = async () => {
 
     try {
-        const [rows, fields]: [IColumnName[], mysql.FieldPacket[]] =  await pool.query(
+        const rows = await readRows<IColumnName>(
             // Selects all columns
-            `SELECT column_name FROM information_schema.columns WHERE table_name = 'census_learn_sql'`,
+            `SELECT column_name AS column_name
+             FROM information_schema.columns
+             WHERE table_schema = DATABASE() AND table_name = 'census_learn_sql'`,
         );
-        return { success: rows as IColumnName[], status: 200, error: [] } as IResponse;
+        return { success: rows, status: 200, error: [] } as IResponse;
     } catch (error) {
         return { success: [], error: [error.message], status: 500 } as IResponse;
     }
 };
 
-export interface IUniqueValuesCount extends mysql.RowDataPacket {
+export interface IUniqueValuesCount {
     [key: string]: number;
 }
 
-export interface IData extends mysql.RowDataPacket {
-    [key: string]: (string | number);
+export interface IData {
+    [key: string]: string | number;
 }
 
 export const data = async (columnName: string) => {
     try {
-        const [rows, fields]: [IData[], mysql.FieldPacket[]] = await pool.query(
+        const rows = await readRows<IData>(
           // First 100 distinct values, with the average age of the people in each value.
           `SELECT ??, COUNT(??) as counter, AVG(age) as average
            FROM census_learn_sql GROUP BY ?? ORDER BY COUNT(??) DESC LIMIT 0,100`,
             [columnName, columnName, columnName, columnName],
         );
-        return { success: rows as IData[], status: 200, error: [] } as IResponse;
+        return { success: rows, status: 200, error: [] } as IResponse;
     } catch (error) {
         return { success: [], error: [error.message] as Error, status: 500 } as IResponse;
     }
 };
 
-export interface ICumulativeUniqueValuesCount extends mysql.RowDataPacket {
+export interface ICumulativeUniqueValuesCount {
     [key: string]: number;
 }
 
-export interface ITotalCount extends mysql.RowDataPacket {
+export interface ITotalCount {
     [key: string]: number;
 }
 
-export interface ICumulativeTotalCount extends mysql.RowDataPacket {
+export interface ICumulativeTotalCount {
     [key: string]: number;
 }
 
 export const remainingTotalCount = async (columnName: string) => {
     try {
-        const [cumulativeTotalCountRows, cumulativeTotalCountFields]: [
-            ICumulativeTotalCount[],
-            mysql.FieldPacket[],
-        ] = await pool.query(
+        const cumulativeTotalCountRows = await readRows<ICumulativeTotalCount>(
             // Counts the number of column values
             `SELECT COUNT(??) FROM census_learn_sql LIMIT 0,100`,
             columnName,
         );
 
-        const [totalCountRows, totalCountFields]: [ITotalCount[], mysql.FieldPacket[]] =  await pool.query(
+        const totalCountRows = await readRows<ITotalCount>(
             // Counts the number of column values
             `SELECT COUNT(??) FROM census_learn_sql`,
             columnName,
@@ -93,19 +97,13 @@ export const remainingTotalCount = async (columnName: string) => {
 
 export const remainingUniqueValuesCount = async (columnName: string) => {
     try {
-        const [cumulativeUniqueValuesCountRows, cumulativeUniqueValuesCountFields]: [
-            ICumulativeUniqueValuesCount[],
-            mysql.FieldPacket[],
-        ] = await pool.query(
+        const cumulativeUniqueValuesCountRows = await readRows<ICumulativeUniqueValuesCount>(
             // Counts the number of distinct column values
             `SELECT COUNT(DISTINCT ??) FROM census_learn_sql LIMIT 0,100`,
             columnName,
         );
 
-        const [uniqueValuesCountRows, uniqueValuesCountFields]: [
-            IUniqueValuesCount[],
-            mysql.FieldPacket[],
-        ] = await pool.query(
+        const uniqueValuesCountRows = await readRows<IUniqueValuesCount>(
             // Counts the number of distinct column values
             `SELECT COUNT(DISTINCT ??) FROM census_learn_sql`,
             columnName,
