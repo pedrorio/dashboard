@@ -6,11 +6,7 @@ import NavBar from "./components/NavBar/NavBar";
 import NoMatch from "./components/NoMatch/NoMatch";
 import { Data } from "./components/Table/Data";
 
-export class App extends React.Component<IProps & RouteProps, IState> {
-  constructor(props) {
-    super(props);
-  }
-
+export class App extends React.Component<RouteProps> {
   public render() {
         return (
             <Fragment>
@@ -23,12 +19,4 @@ export class App extends React.Component<IProps & RouteProps, IState> {
             </Fragment>
         );
     }
-}
-
-interface IProps {
-    // children: React.ReactChild | React.ReactChildren | React.ReactNode | React.ReactNodeArray;
-}
-
-interface IState {
-
 }

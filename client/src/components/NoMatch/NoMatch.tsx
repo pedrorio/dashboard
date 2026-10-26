@@ -1,10 +1,7 @@
 import * as React from "react";
 import { Div, H1, H2, Wrapper } from "./styles";
 
-interface INoMatchProps {
-}
-
-const NoMatch = (props: INoMatchProps) => {
+const NoMatch = () => {
   return (
     <Wrapper>
      <div>
