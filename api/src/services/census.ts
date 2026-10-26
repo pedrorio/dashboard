@@ -42,8 +42,9 @@ export interface IData extends mysql.RowDataPacket {
 export const data = async (columnName: string) => {
     try {
         const [rows, fields]: [IData[], mysql.FieldPacket[]] = await pool.query(
-          // Counts the number of the first 100 distinct column values and the average of the ages of the people who belong to those values
-          `SELECT ??, COUNT(??) as counter, AVG(age) as average FROM census_learn_sql GROUP BY ?? ORDER BY COUNT(??) DESC LIMIT 0,100`,
+          // First 100 distinct values, with the average age of the people in each value.
+          `SELECT ??, COUNT(??) as counter, AVG(age) as average
+           FROM census_learn_sql GROUP BY ?? ORDER BY COUNT(??) DESC LIMIT 0,100`,
             [columnName, columnName, columnName, columnName],
         );
         return { success: rows as IData[], status: 200, error: [] } as IResponse;
@@ -66,7 +67,10 @@ export interface ICumulativeTotalCount extends mysql.RowDataPacket {
 
 export const remainingTotalCount = async (columnName: string) => {
     try {
-        const [cumulativeTotalCountRows, cumulativeTotalCountFields]: [ICumulativeTotalCount[], mysql.FieldPacket[]] =  await pool.query(
+        const [cumulativeTotalCountRows, cumulativeTotalCountFields]: [
+            ICumulativeTotalCount[],
+            mysql.FieldPacket[],
+        ] = await pool.query(
             // Counts the number of column values
             `SELECT COUNT(??) FROM census_learn_sql LIMIT 0,100`,
             columnName,
@@ -78,8 +82,10 @@ export const remainingTotalCount = async (columnName: string) => {
             columnName,
         );
 
-        const remainingTotalCount: number = Object.values(totalCountRows[0])[0] - Object.values(cumulativeTotalCountRows[0])[0];
-        return { success: [remainingTotalCount] as RemainingTotalCount[], status: 200, error: [] } as IResponse;
+        const total = Object.values(totalCountRows[0])[0];
+        const shown = Object.values(cumulativeTotalCountRows[0])[0];
+        const remaining: number = total - shown;
+        return { error: [], status: 200, success: [remaining] as RemainingTotalCount[] } as IResponse;
     } catch (error) {
         return { success: [], error: [error.message], status: 500 } as IResponse;
     }
@@ -87,21 +93,29 @@ export const remainingTotalCount = async (columnName: string) => {
 
 export const remainingUniqueValuesCount = async (columnName: string) => {
     try {
-        const [cumulativeUniqueValuesCountRows, cumulativeUniqueValuesCountFields]: [ICumulativeUniqueValuesCount[], mysql.FieldPacket[]] = await pool.query(
+        const [cumulativeUniqueValuesCountRows, cumulativeUniqueValuesCountFields]: [
+            ICumulativeUniqueValuesCount[],
+            mysql.FieldPacket[],
+        ] = await pool.query(
             // Counts the number of distinct column values
             `SELECT COUNT(DISTINCT ??) FROM census_learn_sql LIMIT 0,100`,
             columnName,
         );
 
-        const [uniqueValuesCountRows, uniqueValuesCountFields]: [IUniqueValuesCount[], mysql.FieldPacket[]] = await pool.query(
+        const [uniqueValuesCountRows, uniqueValuesCountFields]: [
+            IUniqueValuesCount[],
+            mysql.FieldPacket[],
+        ] = await pool.query(
             // Counts the number of distinct column values
             `SELECT COUNT(DISTINCT ??) FROM census_learn_sql`,
             columnName,
         );
 
-        const remainingUniqueValuesCount: number = Object.values(uniqueValuesCountRows[0])[0] - Object.values(cumulativeUniqueValuesCountRows[0])[0];
+        const total = Object.values(uniqueValuesCountRows[0])[0];
+        const shown = Object.values(cumulativeUniqueValuesCountRows[0])[0];
+        const remaining: number = total - shown;
 
-        return { success: [remainingUniqueValuesCount] as RemainingUniqueValuesCount[], status: 200, error: [] } as IResponse;
+        return { error: [], status: 200, success: [remaining] as RemainingUniqueValuesCount[] } as IResponse;
     } catch (error) {
         return { success: [], error: [error.message], status: 500 } as IResponse;
     }

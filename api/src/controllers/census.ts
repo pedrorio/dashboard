@@ -3,29 +3,29 @@ import * as censusServices from "../services/census";
 
 export const columnNames = async (request: express.Request, response: express.Response) => {
 
-  const columnNames = await censusServices.columnNames();
+  const columns = await censusServices.columnNames();
 
-  response.status(columnNames.status).send(columnNames);
+  response.status(columns.status).send(columns);
 };
 
 export const data = async (request: express.Request, response: express.Response) => {
   const { columnName } = request.params;
-  const data = await censusServices.data(columnName);
-  response.status(data.status).send(data);
+  const page = await censusServices.data(columnName);
+  response.status(page.status).send(page);
 };
 
 export const remainingTotalCount = async (request: express.Request, response: express.Response) => {
   const { columnName } = request.params;
-  const remainingTotalCount = await censusServices.remainingTotalCount(columnName);
-  response.status(remainingTotalCount.status).send(remainingTotalCount);
+  const total = await censusServices.remainingTotalCount(columnName);
+  response.status(total.status).send(total);
 };
 
 export const remainingUniqueValuesCount = async (request: express.Request, response: express.Response) => {
   const { columnName } = request.params;
 
-  const remainingUniqueValuesCount = await censusServices.remainingUniqueValuesCount(columnName);
+  const uniqueCount = await censusServices.remainingUniqueValuesCount(columnName);
 
-  response.status(remainingUniqueValuesCount.status).send(remainingUniqueValuesCount);
+  response.status(uniqueCount.status).send(uniqueCount);
 };
 
 export const notFound = async (request: express.Request, response: express.Response) => {

@@ -18,5 +18,4 @@ export const App = () => {
   censusRouter(app);
 
   return app;
-
-}
+};

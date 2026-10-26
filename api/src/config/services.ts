@@ -3,12 +3,12 @@ import * as mysql from "mysql2";
 dotenv.config();
 
 export const censusServiceConfig: mysql.PoolOptions = {
-    host: process.env.CENSUS_DB_HOST,
-    user: process.env.CENSUS_DB_USER,
-    database: process.env.CENSUS_DB_NAME,
-    port: process.env.CENSUS_DB_PORT,
-    password: process.env.CENSUS_DB_PASSWORD,
-    waitForConnections: true,
     connectionLimit: 15,
+    database: process.env.CENSUS_DB_NAME,
+    host: process.env.CENSUS_DB_HOST,
+    password: process.env.CENSUS_DB_PASSWORD,
+    port: process.env.CENSUS_DB_PORT,
     queueLimit: 0,
+    user: process.env.CENSUS_DB_USER,
+    waitForConnections: true,
 };

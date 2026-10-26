@@ -11,5 +11,6 @@ const app: Application = App();
 const port = process.env.SERVER_PORT;
 const server = http.createServer(app);
 server.listen(port, () => {
+    // tslint:disable-next-line:no-console
     console.log("Server listening on port: ", port);
 });

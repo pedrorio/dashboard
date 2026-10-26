@@ -27,11 +27,3 @@ export interface IAction {
 
 export type Data = ICensusPaginatedVariableDataState | ActiveCensusVariableState | CensusVariableNamesState;
 export type Args = IFetchPaginatedDataArgs | SelectActiveVariableArgs | FetchVariableNamesArgs;
-
-export interface IActionData {
-
-}
-
-export interface IActionArgs {
-
-}

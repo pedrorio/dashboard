@@ -1,110 +1,171 @@
 import * as React from "react";
 import { connect } from "react-redux";
 import { RouteComponentProps } from "react-router-dom";
-import {Dispatch} from "redux";
+import { Dispatch } from "redux";
 import {
     fetchPaginatedData,
     fetchVariableNames,
     selectActiveVariable,
 } from "../../actions";
-import {ActiveCensusVariableState} from "../../reducers/activeCensusVariable";
-import {ICensusPaginatedVariableDataState} from "../../reducers/censusPaginatedData";
-import {CensusVariableNamesState} from "../../reducers/censusVariableNames";
-import { Div, Table, TableBodyWrapper, TableHeaderWrapper, Td, Th } from "./styles";
+import { ActiveCensusVariableState } from "../../reducers/activeCensusVariable";
+import { FetchStatus, ICensusPaginatedVariableDataState } from "../../reducers/censusPaginatedData";
+import { CensusVariableNamesState } from "../../reducers/censusVariableNames";
+import { Caption, Div, Retry, Status, Table, TableFrame, Td, Th } from "./styles";
 
 interface IParams {
   variableName: string;
 }
 
-class SimpleData extends React.Component<IMapStateToProps & IMapDispatchToProps & RouteComponentProps<IParams>, {}> {
+type IDataProps = IMapStateToProps & IMapDispatchToProps & RouteComponentProps<IParams>;
 
-      public componentDidMount() {
-        const { variableName } = this.props.match.params;
+class SimpleData extends React.Component<IDataProps, {}> {
 
-        if (!(this.props.censusPaginatedData.paginatedVariableData[0] !== undefined &&
-          Object.keys(this.props.censusPaginatedData.paginatedVariableData[0]).includes(variableName)
-        )) {
-          if (this.props.censusVariableNames !== undefined && this.props.censusVariableNames.length !== 0) {
-            if ( !this.props.censusVariableNames.includes(variableName)) {
-              this.props.history.push("/catch");
-            } else {
-              this.props.selectActiveVariable(variableName);
-              this.props.fetchPaginatedData(variableName);
-            }
-
-          }
-        }
-      }
-
-    public componentWillReceiveProps(nextProps) {
-      const { variableName } = this.props.match.params;
-      if (variableName !== nextProps.match.params.variableName) {
-        this.props.fetchPaginatedData(nextProps.activeCensusVariable);
-      }
-      if (typeof nextProps.censusVariableNames !== "undefined" &&
-        nextProps.censusVariableNames.length !== 0 &&
-        typeof this.props.censusVariableNames !== "undefined" &&
-        nextProps.censusVariableNames.length !== this.props.censusVariableNames.length) {
-          if ( !nextProps.censusVariableNames.includes(variableName)) {
-            this.props.history.push("/catch");
-          } else {
-            this.props.selectActiveVariable(variableName);
-            this.props.fetchPaginatedData(variableName);
-          }
-
-        }
-    }
-
-  public renderRows() {
-    const {activeCensusVariable} = this.props;
-
-    const {variableName} = this.props.match.params;
-
-    return this.props.censusPaginatedData.paginatedVariableData.map((variable) => {
-        return (
-          <tr key={variable[variableName || activeCensusVariable]}>
-            <Td>{variable[variableName || activeCensusVariable]}</Td>
-            <Td>{variable.counter}</Td>
-            <Td>{variable.average}</Td>
-          </tr>
-        );
-      });
+  public componentDidMount() {
+    this.reconcileRoute();
   }
 
- public render() {
-   const {variableName} = this.props.match.params;
-   const {activeCensusVariable} = this.props;
+  public componentDidUpdate(prevProps: IDataProps) {
+    const nameChanged = prevProps.match.params.variableName !== this.props.match.params.variableName;
+    if (nameChanged || this.namesLength(prevProps) !== this.namesLength(this.props)) {
+      this.reconcileRoute(prevProps);
+    }
+  }
 
+  public renderRows() {
+    const { activeCensusVariable } = this.props;
+    const { variableName } = this.props.match.params;
 
-   if (!(this.props.censusPaginatedData.paginatedVariableData[0] !== undefined &&
-     Object.keys(this.props.censusPaginatedData.paginatedVariableData[0]).includes(variableName)
-   )) { return null; }
+    return this.props.censusPaginatedData.paginatedVariableData.map((variable, index) => {
+      const value = variable[variableName || activeCensusVariable];
+      return (
+        <tr key={`${variableName}-${index}-${value}`}>
+          <Td>{variable[variableName || activeCensusVariable]}</Td>
+          <Td>{variable.counter}</Td>
+          <Td>{variable.average}</Td>
+        </tr>
+      );
+    });
+  }
 
-   return (
+  public render() {
+    const status = this.viewStatus();
+    switch (status) {
+      case "idle":
+      case "loading":
+        return this.renderLoading();
+      case "error":
+        return this.renderError();
+      case "success":
+        return this.props.censusPaginatedData.paginatedVariableData.length === 0
+          ? this.renderEmpty()
+          : this.renderTable();
+      default: {
+        const unexpected: never = status;
+        return unexpected;
+      }
+    }
+  }
+
+  private renderLoading() {
+    const { variableName } = this.props.match.params;
+    return (
       <Div>
-        <TableHeaderWrapper>
+        <Status aria-busy={true} aria-live="polite" role="status">
+          {`Loading results for ${variableName}.`}
+        </Status>
+      </Div>
+    );
+  }
+
+  private renderError() {
+    const { variableName } = this.props.match.params;
+    return (
+      <Div>
+        <Status role="alert">
+          <p>{`Could not load results for ${variableName}.`}</p>
+          <Retry onClick={this.retry} type="button">Retry</Retry>
+        </Status>
+      </Div>
+    );
+  }
+
+  private renderEmpty() {
+    const { variableName } = this.props.match.params;
+    return (
+      <Div>
+        <Status role="status">{`No results for ${variableName}.`}</Status>
+      </Div>
+    );
+  }
+
+  private renderTable() {
+    const { variableName } = this.props.match.params;
+    const { activeCensusVariable } = this.props;
+
+    return (
+      <Div>
+        <TableFrame>
           <Table>
+            <Caption>{`Results for ${variableName || activeCensusVariable}`}</Caption>
             <thead>
-            <tr>
-              <Th>{variableName || activeCensusVariable}</Th>
-              <Th>Count</Th>
-              <Th>Average Age</Th>
-            </tr>
+              <tr>
+                <Th scope="col">{variableName || activeCensusVariable}</Th>
+                <Th scope="col">Count</Th>
+                <Th scope="col">Average Age</Th>
+              </tr>
             </thead>
-          </Table>
-        </TableHeaderWrapper>
-        <TableBodyWrapper>
-          <Table>
             <tbody>
-            {this.renderRows()}
+              {this.renderRows()}
             </tbody>
           </Table>
-        </TableBodyWrapper>
+        </TableFrame>
         <p>Page number {this.props.censusPaginatedData.pageNumber}</p>
         <p>{this.props.censusPaginatedData.remainingTotalCount} more responses</p>
         <p>{this.props.censusPaginatedData.remainingUniqueValuesCount} more variable responses</p>
       </Div>
     );
+  }
+
+  private namesLength(props: IDataProps) {
+    return props.censusVariableNames ? props.censusVariableNames.length : 0;
+  }
+
+  private retry = () => {
+    this.props.fetchPaginatedData(this.props.match.params.variableName);
+  }
+
+  private viewStatus(): FetchStatus {
+    return this.props.censusPaginatedData.status;
+  }
+
+  private pageIsSettled() {
+    const status = this.props.censusPaginatedData.status;
+    return status === "success" || status === "error";
+  }
+
+  private rowsMatch(variableName: string) {
+    const rows = this.props.censusPaginatedData.paginatedVariableData;
+    return rows[0] !== undefined && Object.keys(rows[0]).indexOf(variableName) !== -1;
+  }
+
+  private reconcileRoute(prevProps?: IDataProps) {
+    const { variableName } = this.props.match.params;
+    const names = this.props.censusVariableNames;
+    if (names === undefined || names.length === 0) {
+      return;
+    }
+    if (!names.includes(variableName)) {
+      this.props.history.push("/catch");
+      return;
+    }
+
+    const routeChanged = prevProps !== undefined && prevProps.match.params.variableName !== variableName;
+    const firstResolution = prevProps === undefined || this.namesLength(prevProps) === 0;
+    this.props.selectActiveVariable(variableName);
+    const alreadySettled = this.pageIsSettled() || this.rowsMatch(variableName);
+    if (routeChanged || !(firstResolution && alreadySettled)) {
+      this.props.fetchPaginatedData(variableName);
+    }
   }
 }
 
@@ -117,21 +178,21 @@ const mapStateToProps = (state): IMapStateToProps => {
 };
 
 interface IMapStateToProps {
-    censusVariableNames: CensusVariableNamesState;
-    activeCensusVariable: ActiveCensusVariableState;
-    censusPaginatedData: ICensusPaginatedVariableDataState;
+  activeCensusVariable: ActiveCensusVariableState;
+  censusPaginatedData: ICensusPaginatedVariableDataState;
+  censusVariableNames: CensusVariableNamesState;
 }
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-    fetchPaginatedData: (variableName) => dispatch(fetchPaginatedData(variableName)),
-    fetchVariableNames: () => dispatch(fetchVariableNames()),
-    selectActiveVariable: (variableName) => dispatch(selectActiveVariable(variableName)),
+  fetchPaginatedData: (variableName) => dispatch(fetchPaginatedData(variableName)),
+  fetchVariableNames: () => dispatch(fetchVariableNames()),
+  selectActiveVariable: (variableName) => dispatch(selectActiveVariable(variableName)),
 });
 
 interface IMapDispatchToProps {
-    fetchVariableNames: typeof fetchVariableNames;
-    selectActiveVariable: typeof selectActiveVariable;
-    fetchPaginatedData: typeof fetchPaginatedData;
+  fetchPaginatedData: typeof fetchPaginatedData;
+  fetchVariableNames: typeof fetchVariableNames;
+  selectActiveVariable: typeof selectActiveVariable;
 }
 
 export const Data = connect(mapStateToProps, mapDispatchToProps)(SimpleData);

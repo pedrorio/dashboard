@@ -1,0 +1,15 @@
+schema: spec-driven
+
+# Constraints an agent cannot infer from the code alone.
+context: |
+  Behaviour fixes stay on the locked stack (React 16, Redux-Saga, webpack 4, TSLint, Enzyme, node-sass).
+  Framework, bundler, linter, and test-library upgrades belong only in the unarchived stack-upgrade proposal.
+  Server-state library migrations belong only in the unarchived server-state proposal.
+  Do not change deploy credentials, AWS configuration, Docker deploy manifests, or secrets.
+  Specs describe observable behaviour. Keep class names and library choices out of requirements.
+
+rules:
+  proposal:
+    - State what is out of scope
+  tasks:
+    - Each task says how to verify it
