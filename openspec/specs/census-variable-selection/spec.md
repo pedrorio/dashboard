@@ -25,25 +25,6 @@ The explorer SHALL treat the `variableName` segment of `/explorer/:variableName`
 - **WHEN** the column list has loaded and does not include the route's variable
 - **THEN** the page navigates to the not-found screen
 
-### Requirement: Variable menu opens on hover
-
-The variable menu SHALL open after the pointer hovers the trigger and close after the pointer leaves. Every menu instance SHALL share one hover timer. The menu SHALL NOT open from a click, tap, Enter, or Space on the trigger.
-
-#### Scenario: Pointer hover
-
-- **WHEN** the pointer hovers the trigger for the hover delay
-- **THEN** the list of census columns is shown
-
-#### Scenario: Two menus share a timer
-
-- **WHEN** the pointer enters one menu and then another before the hover delay elapses
-- **THEN** only the second menu can open
-
-#### Scenario: Keyboard on the trigger
-
-- **WHEN** the trigger has focus and the visitor presses Enter or Space
-- **THEN** the column list stays closed
-
 ### Requirement: Choosing a column from the menu
 
 Activating a column in the menu SHALL store that column as the active selection and navigate to `/explorer/<column>`.
@@ -66,3 +47,32 @@ When the route variable changes to a known column, the page SHALL select that co
 
 - **WHEN** the route changes to a name that is not in the loaded column list
 - **THEN** the page navigates to the not-found screen and does not request the previously selected column
+
+### Requirement: Variable menu opens as a listbox
+
+The variable menu SHALL be a button that controls a listbox of census columns. The button SHALL expose whether the list is open. The list SHALL open and close on click, tap, Enter, and Space. Arrow keys SHALL move through the options. Escape SHALL close the list and return focus to the button. A pointer press outside the menu SHALL close it. Hover MAY open and close a menu, and each menu SHALL time that hover on its own.
+
+#### Scenario: Click or tap the trigger
+
+- **WHEN** the visitor activates the variable button
+- **THEN** the column list is shown and the button reports that it is expanded
+
+#### Scenario: Enter or Space on the trigger
+
+- **WHEN** the variable button has focus and the visitor presses Enter or Space
+- **THEN** the column list toggles
+
+#### Scenario: Arrow keys and Escape
+
+- **WHEN** the list is open and the visitor presses Arrow Down and then Escape
+- **THEN** focus moves to the next column and Escape closes the list with focus on the button
+
+#### Scenario: Pointer press outside
+
+- **WHEN** the list is open and the visitor presses outside the menu
+- **THEN** the list closes
+
+#### Scenario: Two menus hover independently
+
+- **WHEN** the pointer enters two variable menus before either hover delay elapses
+- **THEN** both menus can open

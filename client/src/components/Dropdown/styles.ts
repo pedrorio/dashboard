@@ -26,6 +26,11 @@ export const Link = styled(RouterLink)`
   color: #1D1F26;
   display: block;
   font-weight: 500;
+  width: 100%;
+
+  &[aria-selected="true"] {
+    background: rgba(207, 118, 147, 0.16);
+  }
 `;
 
 export const LinkWrapper = styled.div`
@@ -38,10 +43,10 @@ export const LinkWrapper = styled.div`
 
 export const Div = styled.div`
   position: relative;
-      @media (max-width: 700px) {
-      display: flex;
-      justify-content: center;
-    ;
+  @media (max-width: 700px) {
+    display: flex;
+    justify-content: center;
+  }
 `;
 
 export const Button = styled.button`
