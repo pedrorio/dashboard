@@ -1,6 +1,13 @@
 import * as fs from "fs";
 import * as path from "path";
-import { columnNames, data, pool, remainingTotalCount, remainingUniqueValuesCount } from "./census";
+import {
+    columnNames,
+    data,
+    groupedPageLimit,
+    pool,
+    remainingTotalCount,
+    remainingUniqueValuesCount,
+} from "./census";
 
 const seedPath = path.join(__dirname, "../../../db/seed.sql");
 
@@ -47,12 +54,34 @@ describe("census queries on the configured database", () => {
         expect(hsGrad.average).toBe("34.2500");
     });
 
-    it("runs the remaining-count queries", async () => {
+    it("reports no remainder when the distinct values fit on one page", async () => {
         const total = await remainingTotalCount("education");
         const unique = await remainingUniqueValuesCount("education");
         expect(total.status).toBe(200);
         expect(unique.status).toBe(200);
-        expect(total.success).toHaveLength(1);
-        expect(unique.success).toHaveLength(1);
+        expect(total.success).toEqual([0]);
+        expect(unique.success).toEqual([0]);
+    });
+
+    it("reports the rows and values past the first page", async () => {
+        const extraValues = groupedPageLimit + 5;
+        const extras = [];
+        for (let index = 0; index < extraValues; index++) {
+            extras.push([30, "v-" + String(index), "Female"]);
+        }
+        try {
+            await pool.query(
+                "INSERT INTO census_learn_sql (age, education, sex) VALUES ?",
+                [extras],
+            );
+            const total = await remainingTotalCount("education");
+            const unique = await remainingUniqueValuesCount("education");
+            expect(total.status).toBe(200);
+            expect(unique.status).toBe(200);
+            expect(unique.success).toEqual([extraValues + 6 - groupedPageLimit]);
+            expect(total.success).toEqual([extraValues + 6 - groupedPageLimit]);
+        } finally {
+            await pool.query("DELETE FROM census_learn_sql WHERE education LIKE 'v-%'");
+        }
     });
 });

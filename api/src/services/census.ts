@@ -3,6 +3,13 @@ import { censusServiceConfig } from "../config/services";
 
 export const pool: mysql.Pool  = mysql.createPool(censusServiceConfig as mysql.PoolOptions);
 
+export const groupedPageLimit = 100;
+
+function groupedPageSql(): string {
+    return `SELECT ??, COUNT(??) as counter, AVG(age) as average
+            FROM census_learn_sql GROUP BY ?? ORDER BY COUNT(??) DESC LIMIT 0,${groupedPageLimit}`;
+}
+
 async function readRows<T>(sql: string, values?: string | string[]): Promise<T[]> {
     const queried = values === undefined ? await pool.query(sql) : await pool.query(sql, values);
     return queried[0] as T[];
@@ -39,7 +46,7 @@ export const columnNames = async () => {
 };
 
 export interface IUniqueValuesCount {
-    [key: string]: number;
+    total: number;
 }
 
 export interface IData {
@@ -49,9 +56,8 @@ export interface IData {
 export const data = async (columnName: string) => {
     try {
         const rows = await readRows<IData>(
-          // First 100 distinct values, with the average age of the people in each value.
-          `SELECT ??, COUNT(??) as counter, AVG(age) as average
-           FROM census_learn_sql GROUP BY ?? ORDER BY COUNT(??) DESC LIMIT 0,100`,
+          // First page of distinct values, with the average age of the people in each value.
+          groupedPageSql(),
             [columnName, columnName, columnName, columnName],
         );
         return { success: rows, status: 200, error: [] } as IResponse;
@@ -60,35 +66,25 @@ export const data = async (columnName: string) => {
     }
 };
 
-export interface ICumulativeUniqueValuesCount {
-    [key: string]: number;
-}
-
 export interface ITotalCount {
-    [key: string]: number;
+    total: number;
 }
 
-export interface ICumulativeTotalCount {
-    [key: string]: number;
+export interface IShownCount {
+    shown: number;
 }
 
 export const remainingTotalCount = async (columnName: string) => {
     try {
-        const cumulativeTotalCountRows = await readRows<ICumulativeTotalCount>(
-            // Counts the number of column values
-            `SELECT COUNT(??) FROM census_learn_sql LIMIT 0,100`,
-            columnName,
-        );
-
         const totalCountRows = await readRows<ITotalCount>(
-            // Counts the number of column values
-            `SELECT COUNT(??) FROM census_learn_sql`,
+            `SELECT COUNT(??) AS total FROM census_learn_sql`,
             columnName,
         );
-
-        const total = Object.values(totalCountRows[0])[0];
-        const shown = Object.values(cumulativeTotalCountRows[0])[0];
-        const remaining: number = total - shown;
+        const shownRows = await readRows<IShownCount>(
+            `SELECT COALESCE(SUM(counter), 0) AS shown FROM (${groupedPageSql()}) t`,
+            [columnName, columnName, columnName, columnName],
+        );
+        const remaining = Number(totalCountRows[0].total) - Number(shownRows[0].shown);
         return { error: [], status: 200, success: [remaining] as RemainingTotalCount[] } as IResponse;
     } catch (error) {
         return { success: [], error: [error.message], status: 500 } as IResponse;
@@ -97,22 +93,12 @@ export const remainingTotalCount = async (columnName: string) => {
 
 export const remainingUniqueValuesCount = async (columnName: string) => {
     try {
-        const cumulativeUniqueValuesCountRows = await readRows<ICumulativeUniqueValuesCount>(
-            // Counts the number of distinct column values
-            `SELECT COUNT(DISTINCT ??) FROM census_learn_sql LIMIT 0,100`,
-            columnName,
-        );
-
         const uniqueValuesCountRows = await readRows<IUniqueValuesCount>(
-            // Counts the number of distinct column values
-            `SELECT COUNT(DISTINCT ??) FROM census_learn_sql`,
+            `SELECT COUNT(DISTINCT ??) AS total FROM census_learn_sql`,
             columnName,
         );
-
-        const total = Object.values(uniqueValuesCountRows[0])[0];
-        const shown = Object.values(cumulativeUniqueValuesCountRows[0])[0];
-        const remaining: number = total - shown;
-
+        const total = Number(uniqueValuesCountRows[0].total);
+        const remaining = Math.max(total - groupedPageLimit, 0);
         return { error: [], status: 200, success: [remaining] as RemainingUniqueValuesCount[] } as IResponse;
     } catch (error) {
         return { success: [], error: [error.message], status: 500 } as IResponse;
