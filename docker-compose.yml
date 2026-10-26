@@ -7,13 +7,41 @@ services:
       context: ./nginx
     ports:
       - '4000:80'
+    depends_on:
+      - client
+      - api
+  db:
+    image: mariadb:10.11
+    environment:
+      MARIADB_DATABASE: census
+      MARIADB_USER: census
+      MARIADB_PASSWORD: census
+      MARIADB_ROOT_PASSWORD: census
+    volumes:
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/01-seed.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-ucensus", "-pcensus"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
   api:
     build:
       dockerfile: Dockerfile.dev
       context: ./api
+    environment:
+      SERVER_PORT: "5000"
+      CENSUS_DB_HOST: db
+      CENSUS_DB_PORT: "3306"
+      CENSUS_DB_USER: census
+      CENSUS_DB_PASSWORD: census
+      CENSUS_DB_NAME: census
     volumes:
       - /app/node_modules
       - ./api:/app
+    depends_on:
+      db:
+        condition: service_healthy
   client:
     build:
       dockerfile: Dockerfile.dev

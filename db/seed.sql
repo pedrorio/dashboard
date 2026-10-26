@@ -1,0 +1,37 @@
+CREATE TABLE census_learn_sql (
+  age INT NOT NULL,
+  education VARCHAR(32) NOT NULL,
+  sex VARCHAR(16) NOT NULL
+);
+
+INSERT INTO census_learn_sql (age, education, sex) VALUES
+  (19, 'HS-grad', 'Female'),
+  (22, 'HS-grad', 'Male'),
+  (28, 'HS-grad', 'Female'),
+  (31, 'HS-grad', 'Male'),
+  (36, 'HS-grad', 'Female'),
+  (41, 'HS-grad', 'Male'),
+  (45, 'HS-grad', 'Female'),
+  (52, 'HS-grad', 'Male'),
+  (21, 'Some-college', 'Male'),
+  (24, 'Some-college', 'Female'),
+  (29, 'Some-college', 'Male'),
+  (34, 'Some-college', 'Female'),
+  (40, 'Some-college', 'Male'),
+  (48, 'Some-college', 'Female'),
+  (26, 'Bachelors', 'Female'),
+  (30, 'Bachelors', 'Male'),
+  (35, 'Bachelors', 'Female'),
+  (38, 'Bachelors', 'Male'),
+  (44, 'Bachelors', 'Female'),
+  (49, 'Bachelors', 'Male'),
+  (27, 'Assoc-voc', 'Male'),
+  (33, 'Assoc-voc', 'Female'),
+  (39, 'Assoc-voc', 'Male'),
+  (46, 'Assoc-voc', 'Female'),
+  (32, 'Masters', 'Female'),
+  (37, 'Masters', 'Male'),
+  (43, 'Masters', 'Female'),
+  (55, 'Masters', 'Male'),
+  (41, 'Doctorate', 'Female'),
+  (58, 'Doctorate', 'Male');

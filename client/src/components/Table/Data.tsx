@@ -7,6 +7,7 @@ import {
     fetchVariableNames,
     selectActiveVariable,
 } from "../../actions";
+import { formatAverageAge } from "../../formatAverageAge";
 import { ActiveCensusVariableState } from "../../reducers/activeCensusVariable";
 import { FetchStatus, ICensusPaginatedVariableDataState } from "../../reducers/censusPaginatedData";
 import { CensusVariableNamesState } from "../../reducers/censusVariableNames";
@@ -41,7 +42,7 @@ class SimpleData extends React.Component<IDataProps, {}> {
         <tr key={`${variableName}-${index}-${value}`}>
           <Td>{variable[variableName || activeCensusVariable]}</Td>
           <Td>{variable.counter}</Td>
-          <Td>{variable.average}</Td>
+          <Td>{formatAverageAge(String(variable.average))}</Td>
         </tr>
       );
     });
