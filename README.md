@@ -17,11 +17,15 @@ The URL is the selected column. `/` renders the column cards. `/explorer/:variab
 
 Install and run the scripts with **Node 12**. `node-sass` 4.13.1, which the client still depends on, has a prebuild for that release. Yarn 1 is the package manager (`yarn.lock` in each package).
 
-The full stack is `docker-compose.yml`. nginx listens on port **4000**, proxies `/` to the client dev server, and strips `/api` before proxying to the API. The API reads `SERVER_PORT` and `CENSUS_DB_HOST`, `CENSUS_DB_PORT`, `CENSUS_DB_USER`, `CENSUS_DB_PASSWORD`, and `CENSUS_DB_NAME`. None of those values are committed.
+The full stack is `docker-compose.yml`. nginx listens on port **4000**, proxies `/` to the client dev server, and strips `/api` before proxying to the API. Local compose sets `SERVER_PORT` and the `CENSUS_DB_*` variables for the `census` database. Those values are local only.
 
 ```bash
 docker-compose up --build
 ```
+
+That command loads `db/seed.sql` and serves the explorer at http://localhost:4000.
+
+![Seeded education column](docs/explorer-seed.png)
 
 Client only, from `client/`:
 
