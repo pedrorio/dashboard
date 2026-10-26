@@ -55,6 +55,7 @@ describe("census results table", () => {
       expect(header.prop("scope")).toBe("col");
     });
     expect(tables.find("tbody tr").hostNodes()).toHaveLength(1);
+    expect(tables.find("tbody tr").hostNodes().text()).toContain("41 years 2 months");
     const css = Array.from(document.querySelectorAll("style"))
       .map((node) => (node as HTMLStyleElement).innerHTML)
       .join("\n");
