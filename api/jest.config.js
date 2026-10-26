@@ -15,6 +15,9 @@ module.exports = {
         "jsx",
         "json",
     ],
+    "testPathIgnorePatterns": process.env.CENSUS_DB_HOST
+        ? ["/node_modules/"]
+        : ["/node_modules/", "census.mysql.spec.ts"],
     // "coverageThreshold": {
     //     "global": {
     //         "lines": 80

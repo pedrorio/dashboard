@@ -11,12 +11,12 @@ services:
       - client
       - api
   db:
-    image: mariadb:10.11
+    image: mysql:9
     environment:
-      MARIADB_DATABASE: census
-      MARIADB_USER: census
-      MARIADB_PASSWORD: census
-      MARIADB_ROOT_PASSWORD: census
+      MYSQL_DATABASE: census
+      MYSQL_USER: census
+      MYSQL_PASSWORD: census
+      MYSQL_ROOT_PASSWORD: census
     volumes:
       - ./db/seed.sql:/docker-entrypoint-initdb.d/01-seed.sql:ro
     healthcheck:

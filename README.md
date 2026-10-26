@@ -8,7 +8,7 @@ A small explorer for a census table. The home page lists the columns. Choosing o
 
 ## Architecture
 
-The client is React 16, Redux, and redux-saga. Express in front of MySQL-compatible SQL (census_learn_sql); local compose runs MariaDB 10.11 with a seeded table.
+The client is React 16, Redux, and redux-saga. Express in front of MySQL-compatible SQL (census_learn_sql); local compose runs MySQL 9 with a seeded table. MariaDB 10.11 was only there so information_schema labels stayed lowercase; the column query now aliases `column_name`.
 
 - **Actions** (`client/src/actions`) ask for the column list, ask for one page, or record the selected column.
 - **Reducers** (`client/src/reducers`) keep three pieces of state: `censusVariableNames`, `activeCensusVariable`, and `censusPaginatedData` (rows, remaining counts, page number, and `idle` / `loading` / `success` / `error`).
@@ -55,7 +55,7 @@ yarn lint
 yarn test --coverage=false --watchman=false
 ```
 
-Pull requests run those three commands for both packages (`.github/workflows/ci.yml`, Node 12). Travis still builds the images and deploys; its deploy settings are unchanged. The API route tests mock the census service and do not need a database.
+Pull requests run those three commands for both packages (`.github/workflows/ci.yml`, Node 12) and run the census queries against MySQL 9. Travis still builds the images and deploys; its deploy settings are unchanged. The API route tests mock the census service and do not need a database. The MySQL 9 job sets `CENSUS_DB_*`, loads `db/seed.sql` when the table is missing, and checks the column list and a grouped page.
 
 Production bundles:
 
