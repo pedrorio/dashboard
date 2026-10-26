@@ -7,7 +7,7 @@ export const censusServiceConfig: mysql.PoolOptions = {
     database: process.env.CENSUS_DB_NAME,
     host: process.env.CENSUS_DB_HOST,
     password: process.env.CENSUS_DB_PASSWORD,
-    port: process.env.CENSUS_DB_PORT,
+    port: process.env.CENSUS_DB_PORT ? Number(process.env.CENSUS_DB_PORT) : undefined,
     queueLimit: 0,
     user: process.env.CENSUS_DB_USER,
     waitForConnections: true,
