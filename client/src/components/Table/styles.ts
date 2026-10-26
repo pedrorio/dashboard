@@ -63,3 +63,22 @@ export const Td = styled.td`
 export const Div = styled.div`
   padding: 40px;
 `;
+
+export const Status = styled.div`
+  background: #1D1F26;
+  border: 2px solid #CF7693;
+  border-radius: 4px;
+  color: #fff;
+  padding: 24px;
+`;
+
+export const Retry = styled.button`
+  background: transparent;
+  border: 2px solid #CF7693;
+  border-radius: 3px;
+  color: #CF7693;
+  cursor: pointer;
+  font-weight: 700;
+  margin-top: 12px;
+  padding: 8px 16px;
+`;

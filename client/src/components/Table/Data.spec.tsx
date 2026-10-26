@@ -10,10 +10,12 @@ import { ICensusPaginatedVariableDataState } from "../../reducers/censusPaginate
 import { Data } from "./Data";
 
 const agePage: ICensusPaginatedVariableDataState = {
+  errorMessage: null,
   pageNumber: 1,
   paginatedVariableData: [{ age: "35", average: "41.2", counter: 120 }],
   remainingTotalCount: 1500,
   remainingUniqueValuesCount: 12,
+  status: "success",
 };
 
 function mountAt(path: string, page: ICensusPaginatedVariableDataState = agePage) {
@@ -57,6 +59,46 @@ describe("census results table", () => {
       .map((node) => (node as HTMLStyleElement).innerHTML)
       .join("\n");
     expect(css).toMatch(/position:\s*sticky/);
+    wrapper.unmount();
+  });
+});
+
+const emptyPage: ICensusPaginatedVariableDataState = {
+  errorMessage: null,
+  pageNumber: null,
+  paginatedVariableData: [],
+  remainingTotalCount: null,
+  remainingUniqueValuesCount: null,
+  status: "idle",
+};
+
+describe("census results status", () => {
+  it("announces that results are loading", () => {
+    const { wrapper } = mountAt("/explorer/age", { ...emptyPage, status: "loading" });
+    const status = wrapper.find("[aria-busy]").hostNodes();
+    expect(status).toHaveLength(1);
+    expect(status.prop("aria-live")).toBe("polite");
+    expect(status.text()).toContain("Loading results for age");
+    wrapper.unmount();
+  });
+
+  it("shows an error and retries the same column", () => {
+    const { dispatch, wrapper } = mountAt("/explorer/age", {
+      ...emptyPage,
+      errorMessage: "database unavailable",
+      status: "error",
+    });
+    dispatch.mockClear();
+    expect(wrapper.text()).toContain("Could not load results for age");
+    wrapper.find("button").hostNodes().simulate("click");
+    expect(fetchedVariables(dispatch)).toEqual(["age"]);
+    wrapper.unmount();
+  });
+
+  it("shows an empty state when the page has no rows", () => {
+    const { wrapper } = mountAt("/explorer/education", { ...emptyPage, status: "success" });
+    expect(wrapper.find("table").hostNodes()).toHaveLength(0);
+    expect(wrapper.text()).toContain("No results for education");
     wrapper.unmount();
   });
 });

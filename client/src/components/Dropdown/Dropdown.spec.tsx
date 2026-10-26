@@ -9,10 +9,12 @@ import { ICensusPaginatedVariableDataState } from "../../reducers/censusPaginate
 import { Dropdown } from "./Dropdown";
 
 const emptyPage: ICensusPaginatedVariableDataState = {
+  errorMessage: null,
   pageNumber: null,
   paginatedVariableData: [],
   remainingTotalCount: null,
   remainingUniqueValuesCount: null,
+  status: "idle",
 };
 
 function mountMenus(count: number) {

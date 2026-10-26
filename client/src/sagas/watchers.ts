@@ -46,15 +46,15 @@ export function* fetchPaginatedDataSaga(action: IAction & IActionFetchPaginatedD
             variableDataPayload: call(fetchVariableData, variableName, pageNumber),
         });
 
-
         const data = {
+            errorMessage: null,
             pageNumber,
             paginatedVariableData: payload.variableDataPayload.data.success,
             remainingTotalCount: payload.remainingTotalCountPayload.data.success[0],
-            remainingUniqueValuesCount: payload.remainingUniqueValuesCountPayload.data.success[0]
-
+            remainingUniqueValuesCount: payload.remainingUniqueValuesCountPayload.data.success[0],
+            status: "success",
         } as ICensusPaginatedVariableDataState;
-        
+
         yield put(
             {
                 payload: data as Data,
