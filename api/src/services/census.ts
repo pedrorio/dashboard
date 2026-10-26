@@ -23,7 +23,9 @@ export const columnNames = async () => {
     try {
         const [rows, fields]: [IColumnName[], mysql.FieldPacket[]] =  await pool.query(
             // Selects all columns
-            `SELECT column_name FROM information_schema.columns WHERE table_name = 'census_learn_sql'`,
+            `SELECT column_name AS column_name
+             FROM information_schema.columns
+             WHERE table_schema = DATABASE() AND table_name = 'census_learn_sql'`,
         );
         return { success: rows as IColumnName[], status: 200, error: [] } as IResponse;
     } catch (error) {
@@ -32,11 +34,11 @@ export const columnNames = async () => {
 };
 
 export interface IUniqueValuesCount extends mysql.RowDataPacket {
-    [key: string]: number;
+    [key: string]: any;
 }
 
 export interface IData extends mysql.RowDataPacket {
-    [key: string]: (string | number);
+    [key: string]: any;
 }
 
 export const data = async (columnName: string) => {
@@ -54,15 +56,15 @@ export const data = async (columnName: string) => {
 };
 
 export interface ICumulativeUniqueValuesCount extends mysql.RowDataPacket {
-    [key: string]: number;
+    [key: string]: any;
 }
 
 export interface ITotalCount extends mysql.RowDataPacket {
-    [key: string]: number;
+    [key: string]: any;
 }
 
 export interface ICumulativeTotalCount extends mysql.RowDataPacket {
-    [key: string]: number;
+    [key: string]: any;
 }
 
 export const remainingTotalCount = async (columnName: string) => {
