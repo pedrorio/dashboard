@@ -5,3 +5,6 @@ coverage
 .env
 .idea
 dist
+# tsc and loaders must emit into dist. Never commit JavaScript compiled beside a .ts source.
+src/**/*.js
+src/**/*.js.map
