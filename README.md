@@ -77,4 +77,4 @@ Two proposals are intentionally not implemented: `upgrade-client-stack` (React 1
 
 ## Known limitations
 
-The remaining-count queries use `COUNT` with `LIMIT 0,100` (from `77213bf`), so they report 0 remaining. Left as is.
+Remaining counts ignore NULL values in the selected column. `COUNT(column)` skips them, and a NULL group has a counter of 0, so it changes neither remainder.
