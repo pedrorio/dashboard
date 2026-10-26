@@ -25,20 +25,6 @@ The explorer SHALL treat the `variableName` segment of `/explorer/:variableName`
 - **WHEN** the column list has loaded and does not include the route's variable
 - **THEN** the page navigates to the not-found screen
 
-### Requirement: Route changes request the previously selected column
-
-When the route variable changes, the page SHALL request results for the column already stored as the active selection, not for the new route variable.
-
-#### Scenario: History navigation to another column
-
-- **WHEN** the visitor is viewing `age` and the route then changes to `education` without a new selection
-- **THEN** the page requests results for `age`
-
-#### Scenario: Route changes to an unknown column
-
-- **WHEN** the route changes to a name that is not in the loaded column list
-- **THEN** the page still requests results for the previously selected column and stays on the explorer route
-
 ### Requirement: Variable menu opens on hover
 
 The variable menu SHALL open after the pointer hovers the trigger and close after the pointer leaves. Every menu instance SHALL share one hover timer. The menu SHALL NOT open from a click, tap, Enter, or Space on the trigger.
@@ -66,3 +52,17 @@ Activating a column in the menu SHALL store that column as the active selection 
 
 - **WHEN** the visitor activates the link for `education`
 - **THEN** `education` becomes the active selection and the route is `/explorer/education`
+
+### Requirement: Route changes request the new column
+
+When the route variable changes to a known column, the page SHALL select that column and SHALL request its results. The page SHALL NOT request the previously selected column. When the new name is absent from the loaded column list, the page SHALL open the not-found screen and SHALL NOT request the previous column.
+
+#### Scenario: History navigation to another column
+
+- **WHEN** the visitor is viewing `age` and the route changes to `education`
+- **THEN** the page selects `education` and requests results for `education`
+
+#### Scenario: Route changes to an unknown column
+
+- **WHEN** the route changes to a name that is not in the loaded column list
+- **THEN** the page navigates to the not-found screen and does not request the previously selected column
