@@ -67,6 +67,10 @@ describe("variable menu", () => {
     expect(button(wrapper).prop("aria-expanded")).toBe(true);
     expect(wrapper.find(`[id="${listId}"]`).hostNodes().prop("role")).toBe("listbox");
     expect(wrapper.find("[role='option']").hostNodes()).toHaveLength(3);
+    const css = Array.from(document.querySelectorAll("style"))
+      .map((node) => (node as HTMLStyleElement).innerHTML)
+      .join("\n");
+    expect(css).toMatch(/z-index:\s*2/);
   });
 
   it("opens from Enter and Space on the trigger", () => {

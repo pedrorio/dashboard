@@ -22,4 +22,6 @@ See proposal.md. The old header sat outside a 500px scrolling body. A sticky hea
 
 ## Risks / Trade-offs
 
+- [A sticky header with `z-index` paints over the variable menu] → The menu panel uses a higher `z-index` so it stays above the header, which is where it sat before the header was sticky.
+
 - [Sticky headers need a scrolling ancestor] → `TableFrame` is that ancestor with `overflow: auto`.

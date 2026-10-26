@@ -5,6 +5,7 @@ export const Wrapper  = styled.div`
     position: absolute;
     right: 0;
     top: 60px;
+    z-index: 2;
     background: white;
     color: rgba(128, 128, 128,0.5);
     max-height: 400px;
