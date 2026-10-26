@@ -1,10 +1,14 @@
 # Census dashboard
 
+A React + TypeScript census explorer: pick a column, see grouped counts and average age. Built to show request cancellation (redux-saga takeLatest), explicit loading and error states, typed tests and CI.
+
+![Explorer showing the education column with count and average age per group](docs/explorer-seed.png)
+
 A small explorer for a census table. The home page lists the columns. Choosing one opens `/explorer/<column>` and shows the most common values for that column, how many rows share each value, and the average age of those rows. The page also shows how many responses and distinct values sit outside that first page.
 
 ## Architecture
 
-The client is React 16, Redux, and redux-saga. The API is Express in front of MySQL (`census_learn_sql`).
+The client is React 16, Redux, and redux-saga. Express in front of MySQL-compatible SQL (census_learn_sql); local compose runs MariaDB 10.11 with a seeded table.
 
 - **Actions** (`client/src/actions`) ask for the column list, ask for one page, or record the selected column.
 - **Reducers** (`client/src/reducers`) keep three pieces of state: `censusVariableNames`, `activeCensusVariable`, and `censusPaginatedData` (rows, remaining counts, page number, and `idle` / `loading` / `success` / `error`).
@@ -15,17 +19,15 @@ The URL is the selected column. `/` renders the column cards. `/explorer/:variab
 
 ## Run
 
-Install and run the scripts with **Node 12**. `node-sass` 4.13.1, which the client still depends on, has a prebuild for that release. Yarn 1 is the package manager (`yarn.lock` in each package).
-
-The full stack is `docker-compose.yml`. nginx listens on port **4000**, proxies `/` to the client dev server, and strips `/api` before proxying to the API. Local compose sets `SERVER_PORT` and the `CENSUS_DB_*` variables for the `census` database. Those values are local only.
-
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
-That command loads `db/seed.sql` and serves the explorer at http://localhost:4000.
+Open http://localhost:4000. That command loads `db/seed.sql`. nginx listens on port 4000, proxies `/` to the client dev server, and strips `/api` before proxying to the API. Database settings for that stack are `SERVER_PORT` and `CENSUS_DB_*` in `docker-compose.yml`.
 
-![Seeded education column](docs/explorer-seed.png)
+## Client or API only
+
+Pinned to Node 12 because node-sass 4.13.1 only has prebuilds there; the upgrade is specified in openspec/changes/upgrade-client-stack. Yarn 1 is the package manager (`yarn.lock` in each package).
 
 Client only, from `client/`:
 
@@ -36,7 +38,7 @@ yarn start:dev
 
 That serves the UI at `http://localhost:3000`. The dev server does not proxy `/api`, so census requests from this process alone have nothing to answer them. Use the compose nginx (port 4000), or another proxy, when you need data.
 
-API only, from `api/`, after exporting the variables above:
+API only, from `api/`. Copy `SERVER_PORT` and `CENSUS_DB_*` from `docker-compose.yml`, then:
 
 ```bash
 yarn
@@ -72,3 +74,7 @@ Behaviour is specified with [OpenSpec](https://github.com/Fission-AI/OpenSpec).
 - `openspec/config.yaml` records constraints, including leaving the deploy credentials and the current stack alone.
 
 Two proposals are intentionally not implemented: `upgrade-client-stack` (React 18, Vite or a current webpack, ESLint, Testing Library, and `sass`) and `census-query-cache` (TanStack Query, with RTK Query as the single-store alternative).
+
+## Known limitations
+
+The remaining-count queries use `COUNT` with `LIMIT 0,100` (from `77213bf`), so they report 0 remaining. Left as is.
