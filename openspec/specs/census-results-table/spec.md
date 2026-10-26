@@ -34,11 +34,16 @@ The page SHALL render no table and no loading, empty, or error message while a p
 - **WHEN** the page request succeeds with an empty row list
 - **THEN** the main area is empty
 
-### Requirement: Header and body are separate tables
+### Requirement: Results are one table with a sticky header
 
-The results SHALL be presented as two tables: one table that contains only the column headings, and a second table that contains the body rows, so the headings stay visually fixed while the body scrolls. Heading cells SHALL NOT use a header scope. The results SHALL NOT have a table caption. Assistive technology SHALL NOT be given a single table that associates those headings with the body cells.
+Populated results SHALL be one table with a caption naming the column. Each heading SHALL be a header cell scoped to its column. The header row SHALL stay visible at the top of the scrolling results while the body scrolls.
 
 #### Scenario: Populated table structure
 
-- **WHEN** populated results are shown
-- **THEN** the document contains two tables, the first has a header row and no body rows, and the second has body rows and no header row
+- **WHEN** populated results are shown for a column
+- **THEN** the document contains one table, that table's caption names the column, its heading cells are column headers, and it has one body row per result
+
+#### Scenario: Header stays put while the body scrolls
+
+- **WHEN** the results body scrolls
+- **THEN** the header row remains at the top of the scrolling region

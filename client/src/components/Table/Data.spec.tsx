@@ -41,6 +41,26 @@ function fetchedVariables(dispatch: jest.SpyInstance) {
     .map((action) => action.payload.variableName);
 }
 
+describe("census results table", () => {
+  it("uses one table with a caption and column scopes", () => {
+    const { wrapper } = mountAt("/explorer/age");
+    const tables = wrapper.find("table").hostNodes();
+    expect(tables).toHaveLength(1);
+    expect(tables.find("caption").hostNodes().text()).toContain("age");
+    const headers = tables.find("thead th").hostNodes();
+    expect(headers).toHaveLength(3);
+    headers.forEach((header) => {
+      expect(header.prop("scope")).toBe("col");
+    });
+    expect(tables.find("tbody tr").hostNodes()).toHaveLength(1);
+    const css = Array.from(document.querySelectorAll("style"))
+      .map((node) => (node as HTMLStyleElement).innerHTML)
+      .join("\n");
+    expect(css).toMatch(/position:\s*sticky/);
+    wrapper.unmount();
+  });
+});
+
 describe("census results route", () => {
   it("requests the column named by the new route", () => {
     const { dispatch, history, wrapper } = mountAt("/explorer/age");

@@ -10,7 +10,7 @@ import {
 import { ActiveCensusVariableState } from "../../reducers/activeCensusVariable";
 import { ICensusPaginatedVariableDataState } from "../../reducers/censusPaginatedData";
 import { CensusVariableNamesState } from "../../reducers/censusVariableNames";
-import { Div, Table, TableBodyWrapper, TableHeaderWrapper, Td, Th } from "./styles";
+import { Caption, Div, Table, TableFrame, Td, Th } from "./styles";
 
 interface IParams {
   variableName: string;
@@ -56,24 +56,21 @@ class SimpleData extends React.Component<IDataProps, {}> {
 
     return (
       <Div>
-        <TableHeaderWrapper>
+        <TableFrame>
           <Table>
+            <Caption>{`Results for ${variableName || activeCensusVariable}`}</Caption>
             <thead>
-            <tr>
-              <Th>{variableName || activeCensusVariable}</Th>
-              <Th>Count</Th>
-              <Th>Average Age</Th>
-            </tr>
+              <tr>
+                <Th scope="col">{variableName || activeCensusVariable}</Th>
+                <Th scope="col">Count</Th>
+                <Th scope="col">Average Age</Th>
+              </tr>
             </thead>
-          </Table>
-        </TableHeaderWrapper>
-        <TableBodyWrapper>
-          <Table>
             <tbody>
-            {this.renderRows()}
+              {this.renderRows()}
             </tbody>
           </Table>
-        </TableBodyWrapper>
+        </TableFrame>
         <p>Page number {this.props.censusPaginatedData.pageNumber}</p>
         <p>{this.props.censusPaginatedData.remainingTotalCount} more responses</p>
         <p>{this.props.censusPaginatedData.remainingUniqueValuesCount} more variable responses</p>
